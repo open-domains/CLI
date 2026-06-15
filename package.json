@@ -1,0 +1,23 @@
+{
+  "name": "@open-domains/cli",
+  "version": "0.1.0",
+  "description": "Command line client for the Open Domains public API.",
+  "type": "module",
+  "bin": {
+    "opendomains": "./bin/opendomains.js",
+    "od": "./bin/opendomains.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "open-domains",
+    "dns",
+    "subdomain",
+    "cli"
+  ],
+  "license": "MIT"
+}
