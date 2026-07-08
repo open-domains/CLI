@@ -95,6 +95,18 @@ async function main() {
       return;
     }
 
+    case "me": {
+      const token = flags.token || await readToken();
+      if (!token) throw new Error("No token configured. Run `opendomains auth login` or set OPENDOMAINS_API_TOKEN.");
+
+      const data = await request("/", {
+        token,
+        query: { action: "me" }
+      });
+      formatOutput(data, flags);
+      return;
+    }
+
     case "request": {
       const subcommand = args[0];
       if (subcommand !== "submit" && subcommand !== "edit") {

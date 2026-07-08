@@ -222,6 +222,11 @@ export function formatOutput(data, flags = {}) {
     return;
   }
 
+  if (data.email && data.stats) {
+    printMe(data);
+    return;
+  }
+
   if (data.status && data.message) {
     console.log(`${data.status}: ${data.message}`);
     return;
@@ -258,6 +263,34 @@ function printRecords(records) {
   }
 }
 
+function printMe(user) {
+  const displayName = user.display_name || user.full_name || user.email;
+
+  console.log(displayName);
+  console.log(`Email: ${user.email}`);
+  if (user.role) console.log(`Role: ${user.role}`);
+  if (user.id) console.log(`ID: ${user.id}`);
+  if (user.joined) console.log(`Joined: ${user.joined}`);
+  console.log(`NS unlocked: ${user.ns_unlocked ? "yes" : "no"}`);
+
+  const stats = user.stats || {};
+  const statRows = [
+    ["Active records", stats.active_records],
+    ["Total records", stats.total_records],
+    ["Total requests", stats.total_requests],
+    ["Pending requests", stats.pending_requests],
+    ["Active API tokens", stats.active_api_tokens]
+  ].filter(([, value]) => value !== undefined && value !== null);
+
+  if (statRows.length) {
+    console.log("");
+    console.log("Stats");
+    for (const [label, value] of statRows) {
+      console.log(`  ${label}: ${value}`);
+    }
+  }
+}
+
 export function printHelp(command) {
   console.log(commandHelp(command));
 }
@@ -285,6 +318,7 @@ Usage:
 
 Usage:
   opendomains auth login
+  opendomains me
   opendomains check <subdomain> <root-domain>
   opendomains rdap <domain>
   opendomains records <domain>

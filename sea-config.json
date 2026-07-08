@@ -1,0 +1,5 @@
+{
+  "main": "dist/opendomains.cjs",
+  "output": "dist/opendomains.blob",
+  "disableExperimentalSEAWarning": true
+}

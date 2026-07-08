@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildEditPayload, buildSubmitPayload, parseArgv } from "../src/cli.js";
+import { buildEditPayload, buildSubmitPayload, formatOutput, parseArgv } from "../src/cli.js";
 
 test("parseArgv reads commands and flags", () => {
   assert.deepEqual(parseArgv(["request", "submit", "site", "--ttl", "300", "--proxied=false"]), {
@@ -35,4 +35,44 @@ test("buildEditPayload maps flags to API fields", () => {
     new_ttl: 3600,
     new_proxied: false
   });
+});
+
+test("formatOutput prints me responses", () => {
+  const lines = [];
+  const originalLog = console.log;
+  console.log = value => lines.push(value);
+
+  try {
+    formatOutput({
+      id: "usr_abc123",
+      email: "user@example.com",
+      display_name: "Alex Smith",
+      role: "user",
+      ns_unlocked: false,
+      stats: {
+        active_records: 3,
+        total_records: 4,
+        total_requests: 7,
+        pending_requests: 1,
+        active_api_tokens: 2
+      }
+    });
+  } finally {
+    console.log = originalLog;
+  }
+
+  assert.deepEqual(lines, [
+    "Alex Smith",
+    "Email: user@example.com",
+    "Role: user",
+    "ID: usr_abc123",
+    "NS unlocked: no",
+    "",
+    "Stats",
+    "  Active records: 3",
+    "  Total records: 4",
+    "  Total requests: 7",
+    "  Pending requests: 1",
+    "  Active API tokens: 2"
+  ]);
 });
