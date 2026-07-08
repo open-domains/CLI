@@ -90,6 +90,75 @@ jobs:
           path: dist
           merge-multiple: true
 
+      - name: Upload executables to VirusTotal
+        env:
+          VIRUSTOTAL_API_KEY: ${{ secrets.VIRUSTOTAL_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${VIRUSTOTAL_API_KEY}" ]; then
+            echo "Missing VIRUSTOTAL_API_KEY repository secret." >&2
+            exit 1
+          fi
+
+          report="dist/VIRUSTOTAL.md"
+          {
+            echo "# VirusTotal Scan Report"
+            echo
+            echo "Release: ${GITHUB_REF_NAME}"
+            echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            echo
+          } > "$report"
+
+          for file in dist/opendomains-*; do
+            [ -f "$file" ] || continue
+            filename="$(basename "$file")"
+            size="$(stat -c%s "$file")"
+            upload_url="https://www.virustotal.com/api/v3/files"
+
+            if [ "$size" -gt 33554432 ]; then
+              upload_url="$(curl --fail --silent --show-error \
+                --header "x-apikey: ${VIRUSTOTAL_API_KEY}" \
+                "https://www.virustotal.com/api/v3/files/upload_url" | jq -r '.data')"
+            fi
+
+            response="$(curl --fail --silent --show-error \
+              --request POST \
+              --url "$upload_url" \
+              --header "x-apikey: ${VIRUSTOTAL_API_KEY}" \
+              --form "file=@${file}")"
+
+            analysis_id="$(jq -r '.data.id' <<< "$response")"
+            analysis_url="https://www.virustotal.com/gui/file-analysis/${analysis_id}"
+
+            echo "Uploaded ${filename} to VirusTotal: ${analysis_url}"
+            {
+              echo "## ${filename}"
+              echo
+              echo "- Size: ${size} bytes"
+              echo "- Analysis ID: \`${analysis_id}\`"
+              echo "- Analysis URL: ${analysis_url}"
+            } >> "$report"
+
+            status="queued"
+            stats="{}"
+            for _ in $(seq 1 10); do
+              sleep 30
+              analysis="$(curl --fail --silent --show-error \
+                --header "x-apikey: ${VIRUSTOTAL_API_KEY}" \
+                "https://www.virustotal.com/api/v3/analyses/${analysis_id}")"
+              status="$(jq -r '.data.attributes.status // "unknown"' <<< "$analysis")"
+              stats="$(jq -c '.data.attributes.stats // {}' <<< "$analysis")"
+              [ "$status" = "completed" ] && break
+            done
+
+            {
+              echo "- Status: ${status}"
+              echo "- Stats: \`${stats}\`"
+              echo
+            } >> "$report"
+          done
+
       - name: Generate checksums
         run: |
           cd dist
@@ -101,3 +170,4 @@ jobs:
           files: |
             dist/opendomains-*
             dist/SHA256SUMS.txt
+            dist/VIRUSTOTAL.md

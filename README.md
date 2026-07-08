@@ -35,13 +35,4 @@ opendomains auth login
 
 The CLI uses the API documented at <https://manage.open-domains.com/api-docs>.
 
-## Build executables
-
-GitHub Actions builds standalone binaries for Linux and Windows on pushes, pull requests, manual runs, and `v*` tags.
-
-The workflow uses Node's Single Executable Application tooling and uploads:
-
-- `opendomains-linux-x64`
-- `opendomains-windows-x64.exe`
-
-Release tags such as `v0.1.0` also publish the binaries and `SHA256SUMS.txt` as GitHub release assets.
+#
