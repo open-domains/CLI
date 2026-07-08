@@ -71,7 +71,7 @@ jobs:
         run: codesign --remove-signature "dist/${{ matrix.artifact }}" || true
 
       - name: Inject CLI blob
-        run: npx --yes postject@1.0.0 "dist/${{ matrix.artifact }}" NODE_SEA_BLOB dist/opendomains.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
+        run: npx --yes postject@1.0.0-alpha.6 "dist/${{ matrix.artifact }}" NODE_SEA_BLOB dist/opendomains.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2
 
       - name: Sign macOS executable
         if: runner.os == 'macOS'
