@@ -23,6 +23,7 @@ opendomains me
 opendomains check mysite is-not-a.dev
 opendomains records mysite.is-not-a.dev
 opendomains rdap mysite.is-not-a.dev
+opendomains whois mysite.is-not-a.dev
 opendomains request submit mysite is-not-a.dev A 1.2.3.4 --ttl 3600 --reason "Personal project"
 opendomains request edit abc123 --content 5.6.7.8 --ttl 3600
 ```
@@ -32,6 +33,8 @@ Authenticated commands use `OPENDOMAINS_API_TOKEN`, `--token`, or the token save
 ```bash
 opendomains auth login
 ```
+
+`whois` requires a staff or admin API token.
 
 The CLI uses the API documented at <https://manage.open-domains.com/api-docs>.
 

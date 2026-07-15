@@ -227,6 +227,11 @@ export function formatOutput(data, flags = {}) {
     return;
   }
 
+  if (data.subdomain && (data.owner_email || data.owner_id || data.request_history)) {
+    printWhois(data);
+    return;
+  }
+
   if (data.status && data.message) {
     console.log(`${data.status}: ${data.message}`);
     return;
@@ -291,6 +296,44 @@ function printMe(user) {
   }
 }
 
+function printWhois(record) {
+  console.log(record.subdomain);
+
+  const rows = [
+    ["Owner email", record.owner_email],
+    ["Owner ID", record.owner_id],
+    ["Status", record.status],
+    ["Record type", record.record_type],
+    ["Content", record.content],
+    ["TTL", record.ttl],
+    ["Proxied", formatBoolean(record.proxied)],
+    ["Managed", formatBoolean(record.managed)],
+    ["DNS verified", formatBoolean(record.dns_verified)],
+    ["Created", record.created],
+    ["Last synced", record.last_synced]
+  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+
+  for (const [label, value] of rows) {
+    console.log(`${label}: ${value}`);
+  }
+
+  if (Array.isArray(record.request_history) && record.request_history.length) {
+    console.log("");
+    console.log("Request history");
+    for (const request of record.request_history) {
+      const submitted = request.submitted ? ` submitted ${request.submitted}` : "";
+      const reviewedBy = request.reviewed_by ? ` by ${request.reviewed_by}` : "";
+      const reviewedAt = request.reviewed_at ? ` at ${request.reviewed_at}` : "";
+      console.log(`  ${request.id || "request"}: ${request.status || "unknown"}${submitted}${reviewedBy}${reviewedAt}`);
+    }
+  }
+}
+
+function formatBoolean(value) {
+  if (value === undefined || value === null) return value;
+  return value ? "yes" : "no";
+}
+
 export function printHelp(command) {
   console.log(commandHelp(command));
 }
@@ -322,6 +365,7 @@ Usage:
   opendomains check <subdomain> <root-domain>
   opendomains rdap <domain>
   opendomains records <domain>
+  opendomains whois <domain>
   opendomains request submit <subdomain> <root-domain> <record-type> <record-value>
   opendomains request edit <dns-record-id> [--content value]
 

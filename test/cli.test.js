@@ -76,3 +76,55 @@ test("formatOutput prints me responses", () => {
     "  Active API tokens: 2"
   ]);
 });
+
+test("formatOutput prints whois responses", () => {
+  const lines = [];
+  const originalLog = console.log;
+  console.log = value => lines.push(value);
+
+  try {
+    formatOutput({
+      subdomain: "mysite.is-a.dev",
+      owner_email: "user@example.com",
+      owner_id: "usr_abc123",
+      record_type: "A",
+      content: "1.2.3.4",
+      ttl: 3600,
+      proxied: false,
+      status: "active",
+      managed: true,
+      created: "2025-03-01T10:00:00Z",
+      last_synced: "2025-06-15T08:00:00Z",
+      dns_verified: true,
+      request_history: [
+        {
+          id: "req_abc",
+          status: "approved",
+          submitted: "2025-03-01T09:00:00Z",
+          reviewed_by: "admin@example.com",
+          reviewed_at: "2025-03-01T10:00:00Z"
+        }
+      ]
+    });
+  } finally {
+    console.log = originalLog;
+  }
+
+  assert.deepEqual(lines, [
+    "mysite.is-a.dev",
+    "Owner email: user@example.com",
+    "Owner ID: usr_abc123",
+    "Status: active",
+    "Record type: A",
+    "Content: 1.2.3.4",
+    "TTL: 3600",
+    "Proxied: no",
+    "Managed: yes",
+    "DNS verified: yes",
+    "Created: 2025-03-01T10:00:00Z",
+    "Last synced: 2025-06-15T08:00:00Z",
+    "",
+    "Request history",
+    "  req_abc: approved submitted 2025-03-01T09:00:00Z by admin@example.com at 2025-03-01T10:00:00Z"
+  ]);
+});

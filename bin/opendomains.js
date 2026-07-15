@@ -95,6 +95,21 @@ async function main() {
       return;
     }
 
+    case "whois": {
+      const domain = args[0] || flags.domain || flags.subdomain;
+      if (!domain) throw new Error("Usage: opendomains whois <domain>");
+
+      const token = flags.token || await readToken();
+      if (!token) throw new Error("No token configured. Run `opendomains auth login` or set OPENDOMAINS_API_TOKEN.");
+
+      const data = await request("/", {
+        token,
+        query: { action: "whois", domain }
+      });
+      formatOutput(data, flags);
+      return;
+    }
+
     case "me": {
       const token = flags.token || await readToken();
       if (!token) throw new Error("No token configured. Run `opendomains auth login` or set OPENDOMAINS_API_TOKEN.");
